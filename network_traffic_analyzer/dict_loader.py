@@ -7,6 +7,8 @@ class DictLoader:
         self.ethertypes = self.load_dictionary(const.ETHERTYPES_FILE)
         self.saps = self.load_dictionary(const.SAP_FILE)
         self.pids = self.load_dictionary(const.PID_FILE)
+        self.protocols = self.load_dictionary(const.PROTOCOLS_FILE)
+        self.app_protocols = self.load_dictionary(const.APP_PROTOCOLS_FILE)
 
     @staticmethod
     def load_dictionary(filename: str) -> dict:

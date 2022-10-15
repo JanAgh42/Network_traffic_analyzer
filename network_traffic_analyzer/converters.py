@@ -14,9 +14,22 @@ class Convert:
                 converted_mac += ":"
                 
         return converted_mac
-    
+
     @staticmethod
-    def convert_length(length: str) -> int:
+    def convert_ip(ip: str) -> str:
+        converted_ip = ""
+
+        for b in range(0, ip.__len__() - 1, 2):
+            octet = str(Convert.convert_hexa(ip[b : b + 2]))
+            converted_ip += octet
+
+            if(b < ip.__len__() - 2):
+                converted_ip += "."
+        
+        return converted_ip
+
+    @staticmethod
+    def convert_hexa(length: str) -> int:
         return int(str(length), 16)
 
     @staticmethod

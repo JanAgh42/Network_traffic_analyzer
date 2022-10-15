@@ -5,13 +5,15 @@
 0805_X.25 Level 3
 0806_ARP
 8035_Reverse ARP
-809B_Appletalk
-80F3_Appletalk AARP
+809b_Appletalk
+80f3_Appletalk AARP
 8100_IEEE 802.1Q VLAN-tagged frames
 8137_Novell IPX
-86DD_IPv6
-880B_PPP
+86dd_IPv6
+880b_PPP
 8847_MPLS
 8848_MPLS with upstream-assigned label
 8863_PPPoE Discovery Stage
 8864_PPPoE Session Stage
+88cc_LLDP
+9000_ECTP
