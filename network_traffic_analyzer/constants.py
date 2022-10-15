@@ -1,8 +1,7 @@
-MAC_LENGTH = 12
-ETHERTYPE_LENGTH = 4
-ISL_HEADER_LENGTH = 52
+MAC_LEN = 12
+ISL_HEADER_LEN = 52
 
-IO_FILE = "trace-27"
+IO_FILE = "trace-26"
 PCAP_FILE = "./pcaps/" + IO_FILE
 
 FRAMETYPES_FILE = "./Protocols/frametypes.txt"

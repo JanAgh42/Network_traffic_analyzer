@@ -28,7 +28,7 @@ class YamlCreator:
 
     def dump_into_file(self, outputname: str) -> None:
         with open(outputname, 'w') as file:
-            self.yaml.dump(self.yaml_file, file)
+            self.yaml.dump(self.yaml_file, file, transform = self.remove_end_marker)
         file.close()
 
         if(self.yaml_ipv4["ipv4_senders"].__len__() > 0):
@@ -41,10 +41,17 @@ class YamlCreator:
                 data = CommentedMap(self.yaml_ipv4["ipv4_senders"][index])
                 data.yaml_set_start_comment('\n')
                 self.yaml_ipv4["ipv4_senders"][index] = data
-            self.yaml.dump(self.yaml_ipv4, file)
-            file.write('\n')
+            self.yaml.dump(self.yaml_ipv4, file, transform = self.remove_end_marker)
+            file.write('\n\n')
         file.close()
 
         with open(outputname, 'a') as file:
-            self.yaml.dump(self.yaml_max, file)
+            self.yaml.dump(self.yaml_max, file, transform = self.remove_end_marker)
         file.close()
+
+    def remove_end_marker(self, input: str) -> str:
+        if input.endswith('...\n'):
+            return input[: -4]
+        elif input.endswith('\n'):
+            return input[: -1]
+        return input
