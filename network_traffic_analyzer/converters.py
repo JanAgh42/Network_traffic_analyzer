@@ -12,6 +12,7 @@ class Convert:
 
             if(b < mac.__len__() - 2):
                 converted_mac += ":"
+                
         return converted_mac
     
     @staticmethod
@@ -31,5 +32,6 @@ class Convert:
 
             if(b % 32 == 30 and b != 0):
                 converted_frame += "\n"
+
         converted_frame += "\r\n"
         return LiteralScalarString(converted_frame)

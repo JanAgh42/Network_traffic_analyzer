@@ -1,4 +1,4 @@
-from constants import ETHERTYPE_LENGTH, MAC_LENGTH, IO_FILE
+import constants as const
 from converters import Convert
 from dict_loader import DictLoader
 from yaml_creator import YamlCreator
@@ -14,21 +14,27 @@ class Frame:
         self.frame_count = counter
 
     def init_analization(self) -> None:
-        self.type_length = self.frame_obj[MAC_LENGTH * 2 : MAC_LENGTH * 2 + ETHERTYPE_LENGTH]
+        self.offset = 0
+        self.destination_mac = self.frame_obj[: const.MAC_LENGTH]
+
+        if(self.destination_mac == const.ISL_MAC_FIRST or self.destination_mac == const.ISL_MAC_SECOND):
+            self.offset = const.ISL_HEADER_LENGTH
+        
+        self.type_length = self.frame_obj[self.offset + const.MAC_LENGTH * 2 : self.offset + const.MAC_LENGTH * 2 + const.ETHERTYPE_LENGTH]
         self.frame_type = self.get_type()
         self.frame_length = len(self.frame_obj) / 2
         self.frame_length_medium = self.frame_length + 4
-        self.destination_mac = Convert.convert_mac(self.frame_obj[: MAC_LENGTH])
-        self.source_mac = Convert.convert_mac(self.frame_obj[MAC_LENGTH : MAC_LENGTH * 2])
+        self.destination_mac = Convert.convert_mac(self.frame_obj[self.offset : self.offset + const.MAC_LENGTH])
+        self.source_mac = Convert.convert_mac(self.frame_obj[self.offset + const.MAC_LENGTH : self.offset + const.MAC_LENGTH * 2])
         self.hexa_frame = Convert.convert_frame(self.frame_obj)
 
         # if(self.frame_type == self.dicts.frametypes["xxxx"]):
         #     self.ether_type = self.dicts.ethertypes[self.type_length]
 
         if(self.frame_type == self.dicts.frametypes["yyyy"]):
-            self.sap = self.dicts.saps[self.frame_obj[MAC_LENGTH * 2 + ETHERTYPE_LENGTH : MAC_LENGTH * 2 + ETHERTYPE_LENGTH + 2]]
+            self.sap = self.dicts.saps[self.frame_obj[self.offset + MAC_LENGTH * 2 + ETHERTYPE_LENGTH : self.offset + MAC_LENGTH * 2 + ETHERTYPE_LENGTH + 2]]
         elif(self.frame_type == self.dicts.frametypes["aaaa"]):
-            self.pid = self.dicts.pids[self.frame_obj[MAC_LENGTH * 3 + 4 : MAC_LENGTH * 3 + 8]]
+            self.pid = self.dicts.pids[self.frame_obj[self.offset + MAC_LENGTH * 3 + 4 : self.offset + MAC_LENGTH * 3 + 8]]
 
     def get_type(self) -> str:
         converted_length = Convert.convert_length(self.type_length)
@@ -36,16 +42,16 @@ class Frame:
         return self.get_ieee_type() if converted_length <= 1500 else self.dicts.frametypes["xxxx"]
 
     def get_ieee_type(self) -> str:
-        dsap_ssap_values = str(self.frame_obj[MAC_LENGTH * 2 + ETHERTYPE_LENGTH : MAC_LENGTH * 2 + ETHERTYPE_LENGTH + 4])
+        dsap_ssap_values = str(self.frame_obj[self.offset + MAC_LENGTH * 2 + ETHERTYPE_LENGTH : self.offset + MAC_LENGTH * 2 + ETHERTYPE_LENGTH + 4])
 
         return self.dicts.frametypes.get(dsap_ssap_values, self.dicts.frametypes["yyyy"])
 
     def insert_yaml_entry(self) -> None:
         entry = dict()
-
+        
         entry["frame_number"] = self.frame_count
-        entry["len_frame_pcap"] = self.frame_length
-        entry["len_frame_medium"] = self.frame_length_medium
+        entry["len_frame_pcap"] = int(self.frame_length)
+        entry["len_frame_medium"] = int(self.frame_length_medium)
         entry["frame_type"] = self.frame_type
         entry["src_mac"] = self.source_mac
         entry["dst_mac"] = self.destination_mac
