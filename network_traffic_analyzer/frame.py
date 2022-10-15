@@ -1,4 +1,5 @@
 import constants as const
+from senders import Senders
 from converters import Convert
 from dict_loader import DictLoader
 from yaml_creator import YamlCreator
@@ -7,12 +8,12 @@ class Frame:
 
     def __init__(self) -> None:
         self.dicts = DictLoader()
+        self.senders = Senders()
         self.yaml = YamlCreator(const.IO_FILE + ".pcap")
 
     def update_frame(self, frame: str, counter: int) -> None:
         self.frame_obj = frame
         self.frame_count = counter
-        # print(counter, " --- ", frame)
 
     def init_analization(self) -> None:
         self.offset = 0
@@ -34,9 +35,11 @@ class Frame:
             if(self.ether_type == self.dicts.ethertypes["0806"]):
                 self.src_ip = Convert.convert_ip(self.frame_obj[const.MAC_LENGTH * 4 + 8 : const.MAC_LENGTH * 5 + 4])
                 self.dest_ip = Convert.convert_ip(self.frame_obj[const.MAC_LENGTH * 6 + 4 : const.MAC_LENGTH * 7])
+                self.senders.insert_ip(self.src_ip)
             elif(self.ether_type == self.dicts.ethertypes["0800"]):
                 self.src_ip = Convert.convert_ip(self.frame_obj[const.MAC_LENGTH * 4 + 4 : const.MAC_LENGTH * 5])
                 self.dest_ip = Convert.convert_ip(self.frame_obj[const.MAC_LENGTH * 5 : const.MAC_LENGTH * 5 + 8])
+                self.senders.insert_ip(self.src_ip)
                 self.protocol = self.dicts.protocols[self.frame_obj[const.MAC_LENGTH * 3 + 10 : const.MAC_LENGTH * 3 + 12]]
                 if(self.protocol == self.dicts.protocols["06"] or self.protocol == self.dicts.protocols["11"]):
                     self.src_port = str(Convert.convert_hexa(self.frame_obj[const.MAC_LENGTH * 5 + 8 : const.MAC_LENGTH * 6]))
@@ -65,7 +68,7 @@ class Frame:
         else:
             return ""
 
-    def insert_yaml_entry(self) -> None:
+    def insert_yaml_packet_entry(self) -> None:
         entry = dict()
         
         entry["frame_number"] = self.frame_count
@@ -95,4 +98,16 @@ class Frame:
 
         entry["hexa_frame"] = self.hexa_frame
 
-        self.yaml.insert_entry(entry)
+        self.yaml.insert_packet_entry(entry)
+
+    def insert_yaml_senders_entry(self) -> None:
+        for counter in range(0, self.senders.ips.__len__()):
+            entry = dict()
+
+            entry["node"] = self.senders.ips[counter]
+            entry["number_of_sent_packets"] = self.senders.amounts[counter]
+
+            self.yaml.insert_sender_entry(entry)
+
+    def insert_yaml_max_senders(self) -> None:
+        self.yaml.insert_max_sender_entry(self.senders.get_busiest_senders())
