@@ -3,11 +3,14 @@ from ruamel.yaml.comments import CommentedMap
 
 class YamlCreator:
 
-    def __init__(self, pcapname: str) -> None:
+    def __init__(self) -> None:
         self.yaml = YAML()
+        self.reset_values()
+
+    def reset_values(self) -> None:
         self.yaml_file = dict(
             name = "PKS2022/23",
-            pcap_name =  pcapname,
+            pcap_name = "",
             packets = list()
         )
         self.yaml_ipv4 = dict(

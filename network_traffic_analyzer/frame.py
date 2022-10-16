@@ -9,7 +9,7 @@ class Frame:
     def __init__(self) -> None:
         self.dicts = DictLoader()
         self.senders = Senders()
-        self.yaml = YamlCreator(const.IO_FILE + ".pcap")
+        self.yaml = YamlCreator()
 
     def update_frame(self, frame: str, counter: int) -> None:
         self.frame_obj = frame
@@ -30,13 +30,13 @@ class Frame:
             if(self.ether_type == self.dicts.ethertypes["0806"]):
                 self.src_ip = Convert.ip(self.get_part(const.MAC_LEN * 4 + 8, const.MAC_LEN * 5 + 4))
                 self.dst_ip = Convert.ip(self.get_part(const.MAC_LEN * 6 + 4, const.MAC_LEN * 7))
-                self.senders.insert_ip(self.src_ip)
 
             elif(self.ether_type == self.dicts.ethertypes["0800"]):
                 self.src_ip = Convert.ip(self.get_part(const.MAC_LEN * 4 + 4, const.MAC_LEN * 5))
                 self.dst_ip = Convert.ip(self.get_part(const.MAC_LEN * 5, const.MAC_LEN * 5 + 8))
                 self.protocol = self.dicts.protocols[self.get_part(const.MAC_LEN * 4 - 2, const.MAC_LEN * 4)]
                 self.senders.insert_ip(self.src_ip)
+                print("Inserted: ", self.src_ip)
 
                 if(self.protocol == self.dicts.protocols["06"] or self.protocol == self.dicts.protocols["11"]):
                     self.src_port = Convert.hex(self.get_part(const.MAC_LEN * 5 + 8, const.MAC_LEN * 6))

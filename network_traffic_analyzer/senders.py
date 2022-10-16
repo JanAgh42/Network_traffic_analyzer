@@ -1,6 +1,9 @@
 class Senders:
 
     def __init__(self) -> None:
+        self.reset_values()
+
+    def reset_values(self) -> None:
         self.ips = list()
         self.amounts = list()
 
