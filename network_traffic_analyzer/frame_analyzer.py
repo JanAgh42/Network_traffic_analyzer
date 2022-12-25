@@ -20,7 +20,7 @@ class FrameAnalyzer:
         self.mode = mode
 
     def init_analization(self) -> None:
-        isl_check = self.frame_obj[: const.MAC_LEN]
+        isl_check = self.frame_obj[: 12]
 
         if isl_check == const.ISL_MAC_FIRST or isl_check == const.ISL_MAC_SECOND:
             self.offset = const.ISL_HEADER_LEN
@@ -31,71 +31,82 @@ class FrameAnalyzer:
             self.ether_type = self.dicts.ethertypes.get(self.type_length, "")
 
             if self.ether_type == self.dicts.ethertypes["0806"]:
-                self.opcode = self.dicts.opcodes[self.get_part(const.MAC_LEN * 3 + 4, const.MAC_LEN * 3 + 8)]
-                self.src_ip = Convert.ip(self.get_part(const.MAC_LEN * 4 + 8, const.MAC_LEN * 5 + 4))
-                self.dst_ip = Convert.ip(self.get_part(const.MAC_LEN * 6 + 4, const.MAC_LEN * 7))
+                self.opcode = self.dicts.opcodes[self.get_part(40, 44)]
+                self.src_ip = Convert.ip(self.get_part(56, 64))
+                self.dst_ip = Convert.ip(self.get_part(76, 84))
 
             elif self.ether_type == self.dicts.ethertypes["0800"]:
-                self.src_ip = Convert.ip(self.get_part(const.MAC_LEN * 4 + 4, const.MAC_LEN * 5))
-                self.dst_ip = Convert.ip(self.get_part(const.MAC_LEN * 5, const.MAC_LEN * 5 + 8))
-                self.protocol = self.dicts.protocols[self.get_part(const.MAC_LEN * 4 - 2, const.MAC_LEN * 4)]
+                self.src_ip = Convert.ip(self.get_part(52, 60))
+                self.dst_ip = Convert.ip(self.get_part(60, 68))
+                self.protocol = self.dicts.protocols[self.get_part(46, 48)]
                 self.senders.insert_ip(self.src_ip)
 
                 if self.protocol == self.dicts.protocols["06"] or self.protocol == self.dicts.protocols["11"]:
-                    self.src_port = Convert.hex(self.get_part(const.MAC_LEN * 5 + 8, const.MAC_LEN * 6))
-                    self.dst_port = Convert.hex(self.get_part(const.MAC_LEN * 6, const.MAC_LEN * 6 + 4))
+                    self.src_port = Convert.hex(self.get_part(68, 72))
+                    self.dst_port = Convert.hex(self.get_part(72, 76))
                     self.app_protocol = self.get_app_protocol()
 
         elif self.frame_type == self.dicts.frametypes["yyyy"]:
-            self.sap = self.dicts.saps[self.get_part(const.MAC_LEN * 2 + 4, const.MAC_LEN * 2 + 6)]
+            self.sap = self.dicts.saps[self.get_part(28, 30)]
 
         elif self.frame_type == self.dicts.frametypes["aaaa"]:
-            self.pid = self.dicts.pids[self.get_part(const.MAC_LEN * 3 + 4, const.MAC_LEN * 3 + 8)]
+            self.pid = self.dicts.pids[self.get_part(40, 44)]
 
-    def filter_tcp(self, prot: str) -> dict | None:
-        self.type_length = self.get_part(const.MAC_LEN * 2, const.MAC_LEN * 2 + 4)
+    def filter_tcp_udp(self, type: str, tcp_udp_prot: str) -> dict | None:
+        self.type_length = self.get_part(24, 28)
         self.frame_type = self.get_type()
 
-        if self.frame_type == self.dicts.frametypes["xxxx"]:
-            ether_type = self.dicts.ethertypes.get(self.type_length, "")
+        if self.frame_type != self.dicts.frametypes["xxxx"]:
+            return None
 
-            if ether_type == self.dicts.ethertypes["0800"]:
-                protocol = self.dicts.protocols[self.get_part(const.MAC_LEN * 4 - 2, const.MAC_LEN * 4)]
+        ether_type = self.dicts.ethertypes.get(self.type_length, "")
 
-                if protocol ==  self.dicts.protocols["06"]:
-                    self.src_port = Convert.hex(self.get_part(const.MAC_LEN * 5 + 8, const.MAC_LEN * 6))
-                    self.dst_port = Convert.hex(self.get_part(const.MAC_LEN * 6, const.MAC_LEN * 6 + 4))
-                    
-                    if self.get_app_protocol() == self.dicts.app_protocols[prot]:
-                        self.init_analization()
-                        return self.create_yaml_packet_entry()
-        return None
+        if ether_type != self.dicts.ethertypes["0800"]:
+            return None
+
+        protocol = self.dicts.protocols[self.get_part(46, 48)]
+
+        if protocol != self.dicts.protocols[type]:
+            return None
+
+        if protocol == "06":
+            self.src_port = Convert.hex(self.get_part(68, 72))
+            self.dst_port = Convert.hex(self.get_part(72, 76))
+                        
+            if self.get_app_protocol() != self.dicts.app_protocols[tcp_udp_prot]:
+                return None
+
+        self.init_analization()
+        return self.create_yaml_packet_entry()
 
     def filter_arp(self) -> dict | None:
-        self.type_length = self.get_part(const.MAC_LEN * 2, const.MAC_LEN * 2 + 4)
+        self.type_length = self.get_part(24, 28)
         self.frame_type = self.get_type()
 
-        if self.frame_type == self.dicts.frametypes["xxxx"]:
-            ether_type = self.dicts.ethertypes.get(self.type_length, "")
+        if self.frame_type != self.dicts.frametypes["xxxx"]:
+            return None
 
-            if ether_type == self.dicts.ethertypes["0806"]:
-                self.init_analization()
-                return self.create_yaml_packet_entry()
-        return None
+        ether_type = self.dicts.ethertypes.get(self.type_length, "")
+
+        if ether_type != self.dicts.ethertypes["0806"]:
+            return None
+
+        self.init_analization()
+        return self.create_yaml_packet_entry()
 
     def get_tcp_flag(self) -> str:
-        binary = Convert.hex_bin(self.get_part(const.MAC_LEN * 7 + 8, const.MAC_LEN * 8))[-5 :]
+        binary = Convert.hex_bin(self.get_part(92, 96))[-5 :]
         return self.dicts.tcpflags[binary]
 
     def get_base_properties(self) -> None:
-        self.type_length = self.get_part(const.MAC_LEN * 2, const.MAC_LEN * 2 + 4)
+        self.type_length = self.get_part(24, 26)
 
         self.frame_type = self.get_type()
         self.frame_length = len(self.frame_obj) / 2
         self.frame_length_medium = self.frame_length + 4
 
-        self.destination_mac = Convert.mac(self.get_part(0, const.MAC_LEN))
-        self.source_mac = Convert.mac(self.get_part(const.MAC_LEN, const.MAC_LEN * 2))
+        self.destination_mac = Convert.mac(self.get_part(0, 12))
+        self.source_mac = Convert.mac(self.get_part(12, 24))
         self.hexa_frame = Convert.frame(self.frame_obj)
 
     def get_type(self) -> str:
@@ -103,14 +114,16 @@ class FrameAnalyzer:
         return self.get_ieee_type() if converted_length <= 1500 else self.dicts.frametypes["xxxx"]
 
     def get_ieee_type(self) -> str:
-        dsap_ssap_values = str(self.get_part(const.MAC_LEN * 2 + 4, const.MAC_LEN * 2 + 8))
+        dsap_ssap_values = str(self.get_part(28, 32))
         return self.dicts.frametypes.get(dsap_ssap_values, self.dicts.frametypes["yyyy"])
 
     def get_app_protocol(self) -> str:
         if str(self.src_port) in self.dicts.app_protocols:
             return self.dicts.app_protocols[str(self.src_port)]
+
         elif str(self.dst_port) in self.dicts.app_protocols:
             return self.dicts.app_protocols[str(self.dst_port)]
+
         else:
             return ""
 

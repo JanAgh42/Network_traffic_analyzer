@@ -16,7 +16,7 @@ class DictLoader:
     def load_dictionary(filename: str) -> dict:
         dictionary = dict()
 
-        with open(filename) as file:
+        with open("./protocols/" + filename) as file:
             while(line := file.readline().rstrip()):
                 key, value = line.split("_")
                 dictionary[key] = value

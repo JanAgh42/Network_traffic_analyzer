@@ -4,8 +4,7 @@ class Senders:
         self.reset_values()
 
     def reset_values(self) -> None:
-        self.ips = list()
-        self.amounts = list()
+        self.ips, self.amounts = list(), list()
 
     def insert_ip(self, ip: str) -> None:
         if(ip in self.ips):
@@ -15,8 +14,7 @@ class Senders:
             self.amounts.append(1)
 
     def get_busiest_senders(self) -> list:
-        largest = 0
-        busiest = list()
+        largest, busiest = 0, list()
 
         for amount in self.amounts:
             largest = amount if amount > largest else largest

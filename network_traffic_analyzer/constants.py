@@ -1,17 +1,16 @@
-MAC_LEN = 12
 ISL_HEADER_LEN = 52
 
 PCAP_FOLDER = "./pcaps/"
 YAML_FOLDER = "./yamls/"
 
-FRAMETYPES_FILE = "./Protocols/frametypes.txt"
-ETHERTYPES_FILE = "./Protocols/ethertypes.txt"
-SAP_FILE = "./Protocols/llcsap.txt"
-PID_FILE = "./Protocols/llcpid.txt"
-PROTOCOLS_FILE = "./Protocols/protocols.txt"
-APP_PROTOCOLS_FILE = "./Protocols/appprotocols.txt"
-OPCODES_FILE = "./Protocols/opcodes.txt"
-TCP_FLAGS_FILE = "./Protocols/tcpflags.txt"
+FRAMETYPES_FILE = "frametypes.txt"
+ETHERTYPES_FILE = "ethertypes.txt"
+SAP_FILE = "llcsap.txt"
+PID_FILE = "llcpid.txt"
+PROTOCOLS_FILE = "protocols.txt"
+APP_PROTOCOLS_FILE = "appprotocols.txt"
+OPCODES_FILE = "opcodes.txt"
+TCP_FLAGS_FILE = "tcpflags.txt"
 
 ISL_MAC_FIRST = '01000c000000'
 ISL_MAC_SECOND = '03000c000000'
@@ -20,7 +19,7 @@ INTERFACE_DIVIDER = "-----------------------------------"
 
 OPERATION_PROMPT = """
     1 - entire pcap analization
-    2 - TCP analization
+    2 - UDP (TFTP) analization
     3 - ARP analization
     0 - exit
 """
@@ -85,8 +84,7 @@ YAML_FILTER_FILE = dict(
     name = "PKS2022/23",
     pcap_name = "",
     filter_name = "",
-    complete_comms = list(),
-    partial_comms = list()
+    complete_comms = list()
 )
 
 COMM_OPENINGS = [
