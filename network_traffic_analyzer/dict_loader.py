@@ -9,6 +9,8 @@ class DictLoader:
         self.pids = self.load_dictionary(const.PID_FILE)
         self.protocols = self.load_dictionary(const.PROTOCOLS_FILE)
         self.app_protocols = self.load_dictionary(const.APP_PROTOCOLS_FILE)
+        self.opcodes = self.load_dictionary(const.OPCODES_FILE)
+        self.tcpflags = self.load_dictionary(const.TCP_FLAGS_FILE)
 
     @staticmethod
     def load_dictionary(filename: str) -> dict:
@@ -18,5 +20,4 @@ class DictLoader:
             while(line := file.readline().rstrip()):
                 key, value = line.split("_")
                 dictionary[key] = value
-
         return dictionary

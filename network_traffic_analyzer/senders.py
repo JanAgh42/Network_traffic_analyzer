@@ -24,5 +24,4 @@ class Senders:
         for index in range(0, self.amounts.__len__()):
             if(self.amounts[index] == largest):
                 busiest.append(self.ips[index])
-        
         return busiest

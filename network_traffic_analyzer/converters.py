@@ -33,6 +33,10 @@ class Convert:
         return int(str(length), 16)
 
     @staticmethod
+    def hex_bin(number: str) -> str:
+        return bin(int(number, 16))
+
+    @staticmethod
     def frame(frame: str) -> str:
         converted_frame = ""
 

@@ -1,4 +1,0 @@
-xxxx_ETHERNET II
-ffff_IEEE 802.3 RAW
-aaaa_IEEE 802.3 LLC & SNAP
-yyyy_IEEE 802.3 LLC

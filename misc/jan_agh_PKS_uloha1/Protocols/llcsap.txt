@@ -1,3 +1,0 @@
-42_STP
-e0_IPX
-f0_NetBIOS

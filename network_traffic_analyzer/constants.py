@@ -10,18 +10,29 @@ SAP_FILE = "./Protocols/llcsap.txt"
 PID_FILE = "./Protocols/llcpid.txt"
 PROTOCOLS_FILE = "./Protocols/protocols.txt"
 APP_PROTOCOLS_FILE = "./Protocols/appprotocols.txt"
+OPCODES_FILE = "./Protocols/opcodes.txt"
+TCP_FLAGS_FILE = "./Protocols/tcpflags.txt"
 
 ISL_MAC_FIRST = '01000c000000'
 ISL_MAC_SECOND = '03000c000000'
 
 INTERFACE_DIVIDER = "-----------------------------------"
 
-INTERFACE_PROMPT = """
+OPERATION_PROMPT = """
     1 - entire pcap analization
     2 - TCP analization
-    3 - UDP analization
+    3 - ARP analization
     0 - exit
-    """
+"""
+
+PROTOCOL_PROMPT = """
+    80 - HTTP
+    443 - HTTPS
+    23 - TELNET
+    22 - SSH
+    20 - FTP-DATA
+    21 - FTP-CONTROL
+"""
 
 PCAP_NAMES = [
     "eth-1",
@@ -60,5 +71,33 @@ PCAP_NAMES = [
     "trace-24",
     "trace-25",
     "trace-26",
-    "trace-27"
+    "trace-27",
+    "z1-final"
+]
+
+YAML_BASE_FILE = dict(
+    name = "PKS2022/23",
+    pcap_name = "",
+    packets = list()
+)
+
+YAML_FILTER_FILE = dict(
+    name = "PKS2022/23",
+    pcap_name = "",
+    filter_name = "",
+    complete_comms = list(),
+    partial_comms = list()
+)
+
+COMM_OPENINGS = [
+    ["00010", "10010", "10000"],
+    ["00010", "00010", "10000", "10000"]
+]
+
+COMM_CLOSINGS = [
+    ["00001", "10000", "00001", "10000"],
+    ["10001", "10000", "10001", "10000"],
+    ["00001", "00001", "10000", "10000"],
+    ["00001", "00100", "10000"],
+    ["00100", "10100"]
 ]
